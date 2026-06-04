@@ -1,0 +1,38 @@
+services:
+   postgres_db:
+      image: postgres:15-alpine
+      container_name: task_board_postgres
+      restart: always
+      environment:
+         POSTGRES_USER: '12'
+         POSTGRES_PASSWORD: 1212
+         POSTGRES_DB: smart_task_board
+      ports:
+         - '5432:5432'
+      volumes:
+         - postgres_data:/var/lib/postgresql/data
+
+   # 2. FastAPI 后端服务
+   backend_api:
+      build: ./backend
+      container_name: smart_board_backend
+      restart: always
+      environment:
+         DATABASE_URL: 'postgresql+asyncpg://12:1212@postgres_db:5432/smart_task_board'
+      ports:
+         - '8000:8000'
+      depends_on:
+         - postgres_db
+
+   # 3. React 前端服务
+   frontend_ui:
+      build: ./frontend # 指向你的前端文件夹路径
+      container_name: smart_board_frontend
+      restart: always
+      ports:
+         - '80:80'
+      depends_on:
+         - backend_api
+
+volumes:
+   postgres_data:
